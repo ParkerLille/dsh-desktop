@@ -1,0 +1,26 @@
+node_modules/
+.pnpm-store/
+dist/
+dist-electron/
+release/
+coverage/
+.cache/
+
+.env
+.env.*
+!.env.example
+*.log
+*.tmp
+*.bak
+*.bak-*
+*.jsonl
+*.jsonl.zstd
+*.jsonl.zstd.*
+
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Internal agent plans can contain machine-specific diagnostic context.
+docs/superpowers/
