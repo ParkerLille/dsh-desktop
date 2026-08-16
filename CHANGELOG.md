@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. The format 
 
 ## [Unreleased]
 
+### Removed
+
+- Removed the local plugin workbench and its desktop chrome. The desktop shell now shows the full DSH web GUI with no overlay UI.
+
 ## [0.1.0] - 2026-08-15
 
 ### Added

@@ -4,7 +4,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Platform: Windows](https://img.shields.io/badge/platform-Windows-0078D6.svg)](#requirements)
 
-A Windows desktop shell for [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness). It embeds the complete `dsh web` experience in Electron and adds a local browser-plugin workbench without forking or replacing the upstream web application.
+A Windows desktop shell for [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness). It embeds the complete `dsh web` experience in Electron without forking or replacing the upstream web application.
 
 [简体中文](README.zh-CN.md)
 
@@ -15,14 +15,13 @@ A Windows desktop shell for [DeepSeek Harness](https://github.com/deepseek-ai/de
 
 - **Full DSH experience**: conversations, streaming, model settings, files, tools, history, and client plugins remain provided by the upstream DSH web app.
 - **Managed local runtime**: reuses an existing DSH server on `127.0.0.1:3080` or starts the bundled CLI and waits for readiness.
-- **Local plugin workbench**: create, edit, enable, reload, and remove browser-only extensions from the desktop toolbar.
 - **Desktop isolation**: context isolation, renderer sandboxing, restricted navigation, and no Node.js API exposed to the guest page.
 - **Reproducible Windows packaging**: an NSIS build script downloads pinned archives and verifies their SHA-256 checksums.
 - **Tested recovery tooling**: includes a guarded command for one known interrupted-session replay corruption pattern.
 
 ## Project status
 
-`v0.1.0` is the first public release. The application is usable on Windows, but it is still early-stage software. Installers are currently unsigned, automatic updates are not implemented, and the local plugin API may evolve before `1.0`.
+`v0.1.0` is the first public release. The application is usable on Windows, but it is still early-stage software. Installers are currently unsigned and automatic updates are not implemented.
 
 ## Requirements
 
@@ -65,17 +64,15 @@ flowchart LR
   Desktop[Electron desktop shell] -->|starts or reuses| DSH[DSH web server]
   Desktop --> WebView[Sandboxed webview]
   WebView -->|HTTP + WebSocket| DSH
-  Workbench[Local plugin workbench] -->|validated browser source| WebView
 ```
 
 | Area | Responsibility |
 | --- | --- |
-| `src/main` | Electron lifecycle, DSH process management, plugin persistence, IPC |
+| `src/main` | Electron lifecycle, DSH process management, IPC |
 | `src/preload` | Narrow context-isolated desktop bridge |
-| `src/renderer` | Desktop toolbar, webview host, plugin workbench |
-| `src/guest` | Browser-only plugin runtime |
-| `src/shared` | IPC and plugin contracts |
-| `tests` | Process, packaging, UI, plugin, and recovery regression tests |
+| `src/renderer` | Webview host |
+| `src/shared` | IPC contracts |
+| `tests` | Process, packaging, UI, and recovery regression tests |
 
 The shell keeps the original DSH origin and boot path. It does not proxy or reimplement the DSH frontend.
 
@@ -88,34 +85,11 @@ The shell keeps the original DSH origin and boot path. It does not proxy or reim
 
 Do not run multiple DSH servers against the same session storage while opening the same session. The default setup reuses the server already listening on port `3080`.
 
-## Local plugins
-
-Open **Plugins** in the desktop toolbar. Plugins are stored under `%APPDATA%/dsh-desktop/plugins` and receive a browser-only `api` object:
-
-```js
-api.registerPanel({
-  id: 'status',
-  title: 'Build status',
-  html: '<p>Ready</p>',
-})
-
-api.registerCommand({
-  id: 'refresh',
-  label: 'Refresh',
-  run: () => api.notify('Refreshed'),
-})
-```
-
-A plugin can register panels, styles, commands, and notifications. Reloading removes its previous contributions first, and one plugin failure does not stop DSH or other plugins.
-
-> [!WARNING]
-> Plugins cannot access Node.js or Electron APIs, but they execute in the DSH guest page and can interact with its DOM. Only install or write plugins you trust.
-
 ## Privacy and trust boundaries
 
-The desktop shell does not add its own analytics. The bundled DeepSeek Harness dependencies may have their own telemetry and provider behavior; review the [upstream project](https://github.com/deepseek-ai/deepseek-harness) and your DSH settings before use. Conversations, credentials, plugins, and session data remain local to the DSH and desktop user-data directories unless an upstream provider or feature transmits them.
+The desktop shell does not add its own analytics. The bundled DeepSeek Harness dependencies may have their own telemetry and provider behavior; review the [upstream project](https://github.com/deepseek-ai/deepseek-harness) and your DSH settings before use. Conversations, credentials, and session data remain local to the DSH and desktop user-data directories unless an upstream provider or feature transmits them.
 
-Treat `DSH_DESKTOP_URL` as a trusted endpoint. The desktop currently checks that the URL responds, but it does not cryptographically authenticate the service listening there. Local plugins can read or modify rendered guest-page content even though they cannot access Node.js or Electron APIs.
+Treat `DSH_DESKTOP_URL` as a trusted endpoint. The desktop currently checks that the URL responds, but it does not cryptographically authenticate the service listening there.
 
 ## Troubleshooting
 

@@ -4,7 +4,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Platform: Windows](https://img.shields.io/badge/platform-Windows-0078D6.svg)](#运行要求)
 
-这是一个面向 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) 的 Windows 桌面客户端。它通过 Electron 嵌入完整的 `dsh web`，并在不修改、不复制上游 Web 应用的前提下增加本地浏览器插件工作台。
+这是一个面向 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) 的 Windows 桌面客户端。它通过 Electron 嵌入完整的 `dsh web`，并且不修改、不复制上游 Web 应用。
 
 [English](README.md)
 
@@ -15,14 +15,13 @@
 
 - **完整保留 DSH 功能**：对话、流式输出、模型设置、文件、工具、历史记录和客户端插件仍由上游 DSH Web 应用提供。
 - **托管本地运行时**：优先复用 `127.0.0.1:3080` 上已有的 DSH 服务，否则启动安装包内置 CLI 并等待服务就绪。
-- **本地插件工作台**：可以从桌面工具栏创建、编辑、启用、重载和删除浏览器插件。
 - **桌面安全边界**：启用上下文隔离、渲染器沙箱、导航来源限制，不向 guest 页面暴露 Node.js API。
 - **可复现 Windows 打包**：NSIS 脚本使用固定版本归档并校验 SHA-256。
 - **受保护的会话修复工具**：针对一种已知的“中断后旧响应重放”日志损坏提供严格匹配、先备份后修改的修复命令。
 
 ## 项目状态
 
-`v0.1.0` 是第一个公开版本。目前 Windows 桌面端已经可用，但仍属于早期阶段：安装包尚未进行代码签名，没有自动更新能力，本地插件 API 在 `1.0` 前可能调整。
+`v0.1.0` 是第一个公开版本。目前 Windows 桌面端已经可用，但仍属于早期阶段：安装包尚未进行代码签名，没有自动更新能力。
 
 ## 运行要求
 
@@ -65,17 +64,15 @@ flowchart LR
   Desktop[Electron 桌面壳] -->|启动或复用| DSH[DSH Web 服务]
   Desktop --> WebView[沙箱化 WebView]
   WebView -->|HTTP + WebSocket| DSH
-  Workbench[本地插件工作台] -->|校验后的浏览器代码| WebView
 ```
 
 | 目录 | 职责 |
 | --- | --- |
-| `src/main` | Electron 生命周期、DSH 进程管理、插件持久化、IPC |
+| `src/main` | Electron 生命周期、DSH 进程管理、IPC |
 | `src/preload` | 最小化、上下文隔离的桌面桥接层 |
-| `src/renderer` | 桌面工具栏、WebView 宿主、插件工作台 |
-| `src/guest` | 纯浏览器插件运行时 |
-| `src/shared` | IPC 与插件契约 |
-| `tests` | 进程、打包、UI、插件和会话修复回归测试 |
+| `src/renderer` | WebView 宿主 |
+| `src/shared` | IPC 契约 |
+| `tests` | 进程、打包、UI 和会话修复回归测试 |
 
 桌面壳保留 DSH 原有来源、启动注入、HTTP API 和 WebSocket，不代理或重写 DSH 前端。
 
@@ -88,34 +85,11 @@ flowchart LR
 
 不要让多个 DSH 服务共享同一会话存储并同时打开同一个会话。默认配置会复用已监听 `3080` 的服务。
 
-## 本地插件
-
-在桌面工具栏打开 **Plugins**。插件保存在 `%APPDATA%/dsh-desktop/plugins`，并获得一个纯浏览器 `api`：
-
-```js
-api.registerPanel({
-  id: 'status',
-  title: 'Build status',
-  html: '<p>Ready</p>',
-})
-
-api.registerCommand({
-  id: 'refresh',
-  label: 'Refresh',
-  run: () => api.notify('Refreshed'),
-})
-```
-
-插件可以注册面板、样式、命令和通知。重载前会移除旧的 DOM 与样式，单个插件失败不会中断 DSH 或其他插件。
-
-> [!WARNING]
-> 插件不能访问 Node.js 或 Electron API，但会在 DSH guest 页面中执行并能操作页面 DOM。只运行你信任的插件代码。
-
 ## 隐私与信任边界
 
-桌面壳本身不增加分析统计。安装包内的 DeepSeek Harness 依赖可能有自己的遥测与模型提供方行为，使用前请查阅[上游项目](https://github.com/deepseek-ai/deepseek-harness)并检查 DSH 设置。对话、凭据、插件和会话数据默认保存在 DSH 与桌面端用户数据目录中，但上游模型提供方或功能可能会传输相关内容。
+桌面壳本身不增加分析统计。安装包内的 DeepSeek Harness 依赖可能有自己的遥测与模型提供方行为，使用前请查阅[上游项目](https://github.com/deepseek-ai/deepseek-harness)并检查 DSH 设置。对话、凭据和会话数据默认保存在 DSH 与桌面端用户数据目录中，但上游模型提供方或功能可能会传输相关内容。
 
-请把 `DSH_DESKTOP_URL` 视为受信任端点。桌面端目前会检查 URL 是否响应，但不会对监听该地址的服务做密码学身份认证。本地插件虽然不能访问 Node.js 或 Electron API，但能够读取或修改 guest 页面中已渲染的内容。
+请把 `DSH_DESKTOP_URL` 视为受信任端点。桌面端目前会检查 URL 是否响应，但不会对监听该地址的服务做密码学身份认证。
 
 ## 故障排查
 

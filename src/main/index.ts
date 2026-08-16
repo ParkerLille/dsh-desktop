@@ -6,7 +6,6 @@ import { app, BrowserWindow, shell } from 'electron'
 import { requiresWindowsShell, resolveDshLaunch } from './dsh-launch'
 import { DshProcessManager, type ChildProcessLike } from './dsh-process'
 import { registerDesktopIpc } from './ipc'
-import { PluginStore } from './plugin-store'
 
 const DSH_URL = process.env.DSH_DESKTOP_URL ?? 'http://127.0.0.1:3080'
 let processManager: DshProcessManager | null = null
@@ -71,8 +70,7 @@ app.whenReady().then(() => {
     spawn: (executable, args, options) => spawn(executable, [...args], { ...options, stdio: [...options.stdio], shell: process.platform === 'win32' && requiresWindowsShell(executable) }) as unknown as ChildProcessLike,
     onFailure: message => appendFileSync(join(userData, 'desktop.log'), `[${new Date().toISOString()}] ${message}\n`, 'utf8'),
   })
-  const pluginStore = new PluginStore(join(userData, 'plugins'))
-  unregisterIpc = registerDesktopIpc(processManager, pluginStore)
+  unregisterIpc = registerDesktopIpc(processManager)
   createWindow()
   app.on('activate', () => { if (BrowserWindow.getAllWindows().length === 0) createWindow() })
 })
