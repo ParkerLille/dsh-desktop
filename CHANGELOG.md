@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file. The format 
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-08-16
+
 ### Removed
 
 - Removed the local plugin workbench and its desktop chrome. The desktop shell now shows the full DSH web GUI with no overlay UI.
@@ -21,5 +23,6 @@ All notable changes to this project will be documented in this file. The format 
 - Guarded recovery command for interrupted-session replay sequence corruption.
 - Automated tests for process management, plugins, renderer behavior, packaging, and session recovery.
 
-[Unreleased]: https://github.com/ParkerLille/dsh-desktop/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/ParkerLille/dsh-desktop/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/ParkerLille/dsh-desktop/releases/tag/v0.1.1
 [0.1.0]: https://github.com/ParkerLille/dsh-desktop/releases/tag/v0.1.0
