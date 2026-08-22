@@ -65,19 +65,19 @@
     "node-addon-require-builtin-win32-x64-msvc": "0.1.4"
   },
   "devDependencies": {
-    "@vitejs/plugin-react": "5.1.1",
+    "@vitejs/plugin-react": "6.0.5",
     "@testing-library/jest-dom": "7.0.1",
     "@testing-library/react": "16.3.2",
-    "@types/node": "22.10.5",
+    "@types/node": "26.2.0",
     "@types/react": "18.3.18",
     "@types/react-dom": "18.3.5",
-    "electron": "43.4.0",
+    "electron": "43.4.1",
     "electron-builder": "26.15.3",
     "electron-vite": "5.0.0",
     "jsdom": "30.0.1",
-    "typescript": "5.9.3",
-    "vite": "7.2.4",
-    "vitest": "4.1.10"
+    "typescript": "7.0.2",
+    "vite": "8.2.1",
+    "vitest": "4.1.11"
   },
   "build": {
     "appId": "ai.deepseek.dsh.desktop",
